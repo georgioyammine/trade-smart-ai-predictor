@@ -8,7 +8,7 @@ from datetime import date, timedelta
 base_url = "https://smart-trade-ai.herokuapp.com"
 
 
-def post_predictions(stk, predictions):
+def post_predictions(stk, predictions, yesterdayPrice):
     day = date.today()
     stockAbv = stk["abbreviation"]
     for prediction in predictions:
@@ -25,7 +25,7 @@ def post_predictions(stk, predictions):
             "day": d,
             "month": m,
             "year": y,
-            "closingPrice": prediction
+            "closingPrice": lastPrice * (1 + (prediction/100))
         }
 
         response = requests.post(base_url+"/api/Prediction/Dev", json=request_body)
@@ -35,9 +35,9 @@ def post_predictions(stk, predictions):
 if __name__ == '__main__':
     stocks = requests.get("https://smart-trade-ai.herokuapp.com/api/Stock").json()
     for stock in stocks:
-        file = stock_model_generator.generate_model(stock["abbreviation"])
+        file, lastPrice = stock_model_generator.generate_model(stock["abbreviation"])
 
         with open(file, 'rb') as pkl:
             mod = pickle.load(pkl)
             res = mod.predict(10)
-            post_predictions(stock, res)
+            post_predictions(stock, res, lastPrice)

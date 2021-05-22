@@ -32,6 +32,7 @@ def generate_model(value):
     test = df[1029:]
     train = df[:1028]
 
+    last_closing_price = df.sort_values(by=['year', 'month', 'day'], ascending=False)['close'].iloc[0]
 
     def test_stationarity(timeseries):
         rolmean = timeseries.rolling(12).mean()
@@ -64,7 +65,7 @@ def generate_model(value):
     with open(model_name, 'wb') as pkl:
         pickle.dump(model_fit, pkl)
 
-    return model_name
+    return model_name, last_closing_price
 
     # with open(value + str(date.today()) + 'model.pkl', 'rb') as pkl:
     #     mod = pickle.load(pkl)
